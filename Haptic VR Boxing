@@ -1,0 +1,94 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr 14 00:36:24 2019
+@author: Jennifer
+"""
+import socket
+import math
+s= socket.socket()
+host = ''
+port = 1234
+lroll, lpitch, lyaw = 0.0,0.0,0.0
+lcollision = 'F'
+rroll, rpitch, ryaw = 0.0,0.0,0.0
+rcollision = 'F'
+lgroll, lgpitch, lgyaw = 0.0,0.0,0.0
+lgcollision = 'F'
+rx, ry, rz, lx, ly, lz = 0.0,0.0,0.0,0.0,0.0,0.0
+#rgroll, rgpitch, rgyaw = 0.0,0.0,0.0
+#rgcollision = 'F' 
+#rgx = cos(rgyaw)*cos(rgpitch)
+#rgy = sin(rgyaw)*cos(rgpitch)
+#rgz = sin(rgpitch)
+s.bind((host, port))
+print("waiting for connection")
+s.listen(5)
+print("connecting...")
+while True:
+    c, addr = s.accept()
+    print('got connection' + str(addr))
+    ip = addr[0]
+    if ip[len(ip)-1:] == '2':
+        print("left hand")
+        msg = lcollision
+        c.send(msg.encode('utf-8'))
+        ypr = (c.recv(1024)).decode('utf-8').split(':')
+        if ypr:
+            lyaw = float(ypr[2])
+            lpitch = float(ypr[1])
+            lroll = float(ypr[0])
+            punch = ypr[3]
+            #print("",lroll, lpitch,lyaw)
+            lz = -math.cos(lyaw)*math.sin(lpitch)*math.sin(lroll)*-math.sin(lyaw)*math.cos(lroll)*0.5+0.2
+            ly = -math.sin(lyaw)*math.sin(lpitch)*math.sin(lroll)*math.cos(lyaw)*math.cos(lroll)*0.5+0.9
+            lx = 0.5*math.cos(lpitch)*math.sin(lroll)-0.4
+            print("", lx, ly, lz)
+            print("", punch)
+    if ip[len(ip)-1:] == '6':
+        print("unity")
+        msg = "" + str(lx)+ ":" + str(ly)+ ":" + str(lz) + ":" + str(rx) + ":" + str(ry) + ":" + str(rz)
+        c.send(msg.encode('utf-8'))
+        collision = c.recv(1024).decode('utf-8')
+        print(collision)
+    if ip[len(ip)-1:] == '3':
+       print("right hand")
+       msg = rcollision
+       c.send(msg.encode('utf-8'))
+       ypr = (c.recv(1024)).decode('utf-8').split(':')
+       if ypr:
+           ryaw = float(ypr[2])
+           rpitch = float(ypr[1])
+           rroll = float(ypr[0])
+           punch = ypr[3]
+           rz = -math.cos(ryaw)*math.sin(rpitch)*math.sin(rroll)*-math.sin(ryaw)*math.cos(rroll)*0.5
+           ry = -math.sin(ryaw)*math.sin(rpitch)*math.sin(rroll)*math.cos(ryaw)*math.cos(rroll)*0.5+1.0
+           rx = 0.50*math.cos(rpitch)*math.sin(rroll)
+           #print("",rroll, rpitch, ryaw)
+           print("", rx, ry, rz)
+           print("", punch)
+    if ip[len(ip)-1:] == '9':
+       print("left leg")
+       msg = lgcollision
+       c.send(msg.encode('utf-8'))
+       ypr = (c.recv(1024)).decode('utf-8')
+       if ypr:
+           lgyaw = float(ypr[2])
+           lgpitch = float(ypr[1])
+           lgroll = float(ypr[0])
+           lgx = math.cos(lgyaw)*math.cos(lgpitch)
+           lgy = math.sin(lgyaw)*math.cos(lgpitch)
+           lgz = math.sin(lgpitch)
+           #print("",lgroll, lgpitch, lgyaw)
+           print("", lgx, lgy, lgz)
+   #(if ip[len(ip)-1:] == '':
+       #print("right leg")
+       #msg = rgcollision
+       #c.send(msg.encode('utf-8))
+       #ypr = (c.recv(1024)).decode('utf-8')
+       #if ypr:
+          # rgyaw = ypr[2]
+           #rgpitch = ypr[1]
+           #rgroll = ypr[0]
+           #print("", rgroll, rgpitch, rgyaw)
+    #print("lx, ly, lz")
+    c.close()
