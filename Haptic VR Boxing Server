@@ -15,6 +15,8 @@ rcollision = 'F'
 lgroll, lgpitch, lgyaw = 0.0,0.0,0.0
 lgcollision = 'F'
 rx, ry, rz, lx, ly, lz = 0.0,0.0,0.0,0.0,0.0,0.0
+forward = 'N'
+side = 'N'
 #rgroll, rgpitch, rgyaw = 0.0,0.0,0.0
 #rgcollision = 'F' 
 #rgx = cos(rgyaw)*cos(rgpitch)
@@ -39,14 +41,14 @@ while True:
             lroll = float(ypr[0])
             punch = ypr[3]
             #print("",lroll, lpitch,lyaw)
-            lz = -math.cos(lyaw)*math.sin(lpitch)*math.sin(lroll)*-math.sin(lyaw)*math.cos(lroll)*0.5+0.2
+            lz = math.cos(lyaw)*math.sin(lpitch)*math.sin(lroll)*-math.sin(lyaw)*math.cos(lroll)*0.5+0.2
             ly = -math.sin(lyaw)*math.sin(lpitch)*math.sin(lroll)*math.cos(lyaw)*math.cos(lroll)*0.5+0.9
             lx = 0.5*math.cos(lpitch)*math.sin(lroll)-0.4
             print("", lx, ly, lz)
             print("", punch)
     if ip[len(ip)-1:] == '6':
         print("unity")
-        msg = "" + str(lx)+ ":" + str(ly)+ ":" + str(lz) + ":" + str(rx) + ":" + str(ry) + ":" + str(rz)
+        msg = "" + str(lx)+ ":" + str(ly)+ ":" + str(lz) + ":" + str(rx) + ":" + str(ry) + ":" + str(rz) + ":" + str(forward) + ":" + str(side) 
         c.send(msg.encode('utf-8'))
         collision = c.recv(1024).decode('utf-8')
         print(collision)
@@ -60,26 +62,29 @@ while True:
            rpitch = float(ypr[1])
            rroll = float(ypr[0])
            punch = ypr[3]
-           rz = -math.cos(ryaw)*math.sin(rpitch)*math.sin(rroll)*-math.sin(ryaw)*math.cos(rroll)*0.5
+           rz = math.cos(ryaw)*math.sin(rpitch)*math.sin(rroll)*-math.sin(ryaw)*math.cos(rroll)*0.5
            ry = -math.sin(ryaw)*math.sin(rpitch)*math.sin(rroll)*math.cos(ryaw)*math.cos(rroll)*0.5+1.0
            rx = 0.50*math.cos(rpitch)*math.sin(rroll)
            #print("",rroll, rpitch, ryaw)
            print("", rx, ry, rz)
            print("", punch)
-    if ip[len(ip)-1:] == '9':
+    if ip[len(ip)-1:] == '5':
        print("left leg")
        msg = lgcollision
        c.send(msg.encode('utf-8'))
-       ypr = (c.recv(1024)).decode('utf-8')
+       ypr = (c.recv(1024)).decode('utf-8').split(':')
        if ypr:
-           lgyaw = float(ypr[2])
-           lgpitch = float(ypr[1])
-           lgroll = float(ypr[0])
-           lgx = math.cos(lgyaw)*math.cos(lgpitch)
-           lgy = math.sin(lgyaw)*math.cos(lgpitch)
-           lgz = math.sin(lgpitch)
+           forward = ypr[0]
+           side = ypr[1]
+           #lgyaw = float(ypr[2])
+           #lgpitch = float(ypr[1])
+           #lgroll = float(ypr[0])
+           #lgx = math.cos(lgyaw)*math.cos(lgpitch)
+           #lgy = math.sin(lgyaw)*math.cos(lgpitch)
+           #lgz = math.sin(lgpitch)
            #print("",lgroll, lgpitch, lgyaw)
-           print("", lgx, lgy, lgz)
+           print("", forward, side)
+           
    #(if ip[len(ip)-1:] == '':
        #print("right leg")
        #msg = rgcollision
